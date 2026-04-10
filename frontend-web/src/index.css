@@ -1,0 +1,105 @@
+/* ===== RESET ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ===== ROOT ===== */
+:root {
+  --primary-gold: #d4af37;
+  --bg-dark: #121212;
+  --card-bg: #1e1e1e;
+  --text-main: #e0e0e0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+/* ===== BODY ===== */
+body {
+  font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  /* Giúp cuộn mượt hơn trên iPhone/iPad */
+  -webkit-overflow-scrolling: touch; 
+}
+
+/* ===== RESPONSIVE TYPOGRAPHY ===== */
+/* Tự động điều chỉnh cỡ chữ theo thiết bị */
+h4 {
+  font-size: clamp(1.1rem, 2vw + 1rem, 1.5rem);
+}
+
+/* ===== CARD VIOLATION CUSTOM ===== */
+/* Hiệu ứng cho các thẻ vi phạm trên Dashboard */
+.card-violation {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background-color: #ffffff !important; /* Giữ Card trắng để nổi bật ảnh vi phạm */
+}
+
+@media (min-width: 992px) {
+  .card-violation:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 20px rgba(212, 175, 55, 0.2) !important;
+  }
+}
+
+/* ===== TABLE RESPONSIVE FIX ===== */
+/* Đảm bảo bảng trên Tablet và Mobile không bị vỡ */
+@media (max-width: 768px) {
+  .table {
+    font-size: 0.85rem;
+  }
+  
+  /* Thu nhỏ padding để tiết kiệm diện tích trên điện thoại */
+  .container {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}
+
+/* ===== BUTTONS ===== */
+button, .btn {
+  transition: all 0.2s !important;
+  /* Chống bôi đen chữ khi bấm nhanh trên điện thoại */
+  user-select: none;
+}
+
+/* ===== CUSTOM SCROLLBAR (Tối ưu cho PC) ===== */
+@media (min-width: 1024px) {
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #1e1e1e;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-gold);
+  }
+}
+
+/* ===== ANIMATIONS ===== */
+.animate-pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}

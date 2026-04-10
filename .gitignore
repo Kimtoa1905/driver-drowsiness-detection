@@ -1,0 +1,56 @@
+# ==========================================
+# 1. PHẦN CHUNG (Logs, OS, Editors)
+# ==========================================
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# ==========================================
+# 2. PYTHON (ai_engine & backend_api)
+# ==========================================
+**/__pycache__/
+**/*.py[cod]
+**/*.so
+**/.venv
+**/venv/
+**/env/
+**/ENV/
+**/.ipynb_checkpoints
+**/.pytest_cache/
+**/pip-log.txt
+
+# ==========================================
+# 3. NODE.JS (frontend-web)
+# ==========================================
+**/node_modules/
+**/dist/
+**/dist-ssr/
+**/*.local
+**/npm-debug.log*
+
+# ==========================================
+# 4. CUSTOM FOR AI PHONE DETECTION (Quan trọng)
+# ==========================================
+
+# Loại bỏ các ảnh vi phạm đã chụp trong backend
+**/backend_api/static/alerts/*.jpg
+
+# Loại bỏ file dữ liệu log JSON (Để mỗi máy tự sinh log mới)
+**/backend_api/data/alerts.json
+
+# Loại bỏ model AI nếu file quá nặng (nếu muốn repo nhẹ)
+**/ai_engine/model/*.pt
+**/ai_engine/model/*.onnx
+
+# Loại bỏ file ghi chú cá nhân
+note.txt
+
+# File môi trường bí mật
+.env
+.env.local
