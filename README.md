@@ -54,7 +54,6 @@ Hệ thống hoạt động theo mô hình **Real-time Monitoring**, giúp phát
 - Bootstrap
 - Axios
 - Lucide Icons
-- 
 ```
 ai-phone-detection-system/
 ├── ai_engine/               # * Bộ máy xử lý AI *
