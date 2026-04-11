@@ -55,22 +55,21 @@ Hệ thống hoạt động theo mô hình **Real-time Monitoring**, giúp phát
 - Bootstrap
 - Axios
 - Lucide Icons
-
----
-
+- 
+```
 ai-phone-detection-system/
-├── ai_engine/              # * Bộ máy xử lý AI *
-│   ├── detect/             # - Logic xử lý (test.py)
-│   └── model/              # - File model (best.pt)
-├── backend_api/            # * API và Server *
-│   ├── data/               # - Nhật ký JSON
-│   ├── static/alerts/      # - Lưu ảnh vi phạm
-│   └── app.py              # - Flask server chính
-├── frontend-web/           # * Giao diện người dùng *
-│   ├── src/                # - Source code React
+├── ai_engine/               # * Bộ máy xử lý AI *
+│   ├── detect/              #   - Logic xử lý (test.py)
+│   └── model/               #   - File model (best.pt)
+├── backend_api/             # * API và Server *
+│   ├── data/                #   - Nhật ký JSON
+│   ├── static/alerts/       #   - Lưu ảnh vi phạm
+│   └── app.py               #   - Flask server chính
+├── frontend-web/            # * Giao diện người dùng *
+│   ├── src/                 #   - Source code React
 │   └── package.json
-└── venv/                   # * Môi trường ảo (Python) *
----
+└── venv/                    # * Môi trường ảo (Python) *
+```
 
 ## ⚙️ Cài đặt & Khởi chạy (Installation & Setup)
 
