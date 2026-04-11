@@ -58,22 +58,18 @@ Hệ thống hoạt động theo mô hình **Real-time Monitoring**, giúp phát
 
 ---
 
-## 📂 Cấu trúc dự án (Project Structure)
 ai-phone-detection-system/
-├── ai_engine/
-│ ├── detect/ # Logic xử lý AI (test.py)
-│ ├── model/ # File model (best.pt)
-│ └── venv/ # Virtual environment
-│
-├── backend_api/
-│ ├── data/ # Log JSON
-│ ├── static/alerts/ # Ảnh vi phạm
-│ └── app.py # Flask server
-│
-└── frontend-web/
-├── src/ # Source React
-└── package.json
-
+├── ai_engine/              # * Bộ máy xử lý AI *
+│   ├── detect/             # - Logic xử lý (test.py)
+│   └── model/              # - File model (best.pt)
+├── backend_api/            # * API và Server *
+│   ├── data/               # - Nhật ký JSON
+│   ├── static/alerts/      # - Lưu ảnh vi phạm
+│   └── app.py              # - Flask server chính
+├── frontend-web/           # * Giao diện người dùng *
+│   ├── src/                # - Source code React
+│   └── package.json
+└── venv/                   # * Môi trường ảo (Python) *
 ---
 
 ## ⚙️ Cài đặt & Khởi chạy (Installation & Setup)
