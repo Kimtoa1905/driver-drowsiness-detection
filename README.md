@@ -147,7 +147,7 @@ backend_api/data/
 
 ---
 
-## 🧩 Kiến trúc hệ thống (System Architecture)
+## Kiến trúc hệ thống (System Architecture)
 
 Camera → AI Engine → Backend API → Frontend Dashboard
 
