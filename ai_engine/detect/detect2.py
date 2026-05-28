@@ -19,13 +19,17 @@ os.makedirs(ALERT_FOLDER, exist_ok=True)
 os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
 
 # ===== CONFIG =====
-DROWSY_TIME = 1.5       # thời gian nhắm mắt thật (giây)
+DROWSY_TIME = 1.5
 COOLDOWN = 3
 MAX_STORAGE = 12
 SMOOTHING = 10
 
+EAR_THRESHOLD = 0.20
+SMILE_THRESHOLD = 0.5
+
 LEFT_EYE = [33, 160, 158, 133, 153, 144]
 RIGHT_EYE = [362, 385, 387, 263, 373, 380]
+MOUTH = [61, 13, 14, 291]
 
 # ===== MEDIAPIPE =====
 mp_face = mp.solutions.face_mesh
@@ -39,7 +43,6 @@ ear_history = deque(maxlen=SMOOTHING)
 eye_closed_start = None
 last_alert_time = 0
 
-EAR_THRESHOLD = 0.20
 calibrating = True
 calibration_data = []
 calibration_start = time.time()
@@ -53,6 +56,11 @@ def calculate_EAR(eye):
     B = distance(eye[2], eye[4])
     C = distance(eye[0], eye[3])
     return (A + B) / (2.0 * C)
+
+def calculate_MAR(mouth):
+    A = distance(mouth[1], mouth[2])
+    C = distance(mouth[0], mouth[3])
+    return A / C
 
 # ===== SAVE LOG =====
 def save_log_worker(log, frame, filepath):
@@ -83,7 +91,7 @@ def save_log_worker(log, frame, filepath):
     except Exception as e:
         print("❌ ERROR:", e)
 
-print("🚀 DROWSINESS PRO RUNNING...")
+print("🚀 DROWSINESS PRO v2 RUNNING...")
 
 # ===== LOOP =====
 while True:
@@ -104,8 +112,9 @@ while True:
     if results.multi_face_landmarks:
         for face_landmarks in results.multi_face_landmarks:
 
-            left_eye, right_eye = [], []
+            left_eye, right_eye, mouth = [], [], []
 
+            # ===== LẤY LANDMARK =====
             for idx in LEFT_EYE:
                 lm = face_landmarks.landmark[idx]
                 left_eye.append((int(lm.x * w), int(lm.y * h)))
@@ -113,6 +122,10 @@ while True:
             for idx in RIGHT_EYE:
                 lm = face_landmarks.landmark[idx]
                 right_eye.append((int(lm.x * w), int(lm.y * h)))
+
+            for idx in MOUTH:
+                lm = face_landmarks.landmark[idx]
+                mouth.append((int(lm.x * w), int(lm.y * h)))
 
             # ===== EAR =====
             ear_left = calculate_EAR(left_eye)
@@ -122,11 +135,14 @@ while True:
             ear_history.append(ear)
             ear_smooth = sum(ear_history) / len(ear_history)
 
-            # ===== CALIBRATION (3s đầu) =====
+            # ===== MAR =====
+            mar = calculate_MAR(mouth)
+
+            # ===== CALIBRATION =====
             if calibrating:
                 calibration_data.append(ear_smooth)
                 if time.time() - calibration_start > 3:
-                    EAR_THRESHOLD = np.mean(calibration_data) * 0.75
+                    EAR_THRESHOLD = np.mean(calibration_data) * 0.7
                     calibrating = False
                     print("✅ Calibrated EAR:", EAR_THRESHOLD)
 
@@ -135,20 +151,26 @@ while True:
             chin = face_landmarks.landmark[152]
             head_down = (chin.y - nose.y) < 0.05
 
-            # ===== LOGIC TIME =====
+            # ===== EYE TIME LOGIC =====
             if ear_smooth < EAR_THRESHOLD:
                 if eye_closed_start is None:
                     eye_closed_start = time.time()
             else:
-                eye_closed_start = None
+                if eye_closed_start and time.time() - eye_closed_start < 0.3:
+                    pass  # blink nhanh
+                else:
+                    eye_closed_start = None
 
             drowsy_eye = False
             if eye_closed_start:
                 if time.time() - eye_closed_start > DROWSY_TIME:
                     drowsy_eye = True
 
+            # ===== SMILE DETECTION =====
+            is_smiling = mar > SMILE_THRESHOLD
+
             # ===== FINAL DECISION =====
-            if drowsy_eye or head_down:
+            if (drowsy_eye and not is_smiling) or head_down:
                 status = "DROWSY"
                 color = (0, 0, 255)
 
@@ -172,11 +194,18 @@ while True:
 
                     last_alert_time = now
 
+            # ===== DEBUG UI =====
+            cv2.putText(frame, f"EAR: {ear_smooth:.2f}", (20, 80),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,255,255), 2)
+
+            cv2.putText(frame, f"MAR: {mar:.2f}", (20, 110),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,255,255), 2)
+
     # ===== UI =====
     cv2.putText(frame, status, (20, 40),
                 cv2.FONT_HERSHEY_SIMPLEX, 1, color, 3)
 
-    cv2.imshow("DROWSINESS PRO", frame)
+    cv2.imshow("DROWSINESS PRO v2", frame)
 
     if cv2.waitKey(1) & 0xFF == 27:
         break

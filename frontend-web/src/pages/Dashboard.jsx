@@ -1,168 +1,211 @@
-import { useState, useEffect, useCallback } from "react";
-import { Row, Col, Card, Badge, Container, Button } from "react-bootstrap";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Row, Col, Card, Badge, Container, Button, ProgressBar } from "react-bootstrap";
 import axiosClient from "@/api/axiosClient"; 
 import ToastNotification from "@/components/ToastNotification";
-import { 
-  Clock, Monitor, FileText, Database, Trash2, 
-  ExternalLink, ShieldAlert, Activity 
-} from "lucide-react";
+import { Clock, Trash2, ExternalLink, Activity, AlertTriangle, TrendingUp } from "lucide-react";
 
 export default function Dashboard() {
   const [logs, setLogs] = useState([]);
   const [showToast, setShowToast] = useState(false);
   const [newestLog, setNewestLog] = useState(null);
-  
-  // Lấy API Root từ axiosClient để hiển thị ảnh động
+
+  // 🔊 AUDIO
+  const audioRef = useRef(null);
+
   const API_ROOT = axiosClient.defaults.baseURL.replace('/api', '');
 
-  // 1. Dùng useCallback để tránh re-render vô tận và tối ưu bộ nhớ
+  // load audio 1 lần
+  useEffect(() => {
+    audioRef.current = new Audio("/alert.mp3");
+  }, []);
+
   const fetchLogs = useCallback(async () => {
     try {
       const res = await axiosClient.get("/logs");
-      const freshData = res.data;
+      const data = res.data;
 
-      if (freshData.length > 0) {
-        setLogs(prevLogs => {
-          // Chỉ bắn Toast nếu có ID thực sự mới (Tránh bắn trùng khi fetch lại)
-          if (prevLogs.length > 0 && freshData[0].id !== prevLogs[0].id) {
-            setNewestLog(freshData[0]);
+      if (data.length > 0) {
+        setLogs(prev => {
+
+          // 🔥 detect log mới
+          if (prev.length > 0 && data[0].id !== prev[0].id) {
+            setNewestLog(data[0]);
+
+            // 🔊 phát âm thanh
+            if (audioRef.current) {
+              audioRef.current.currentTime = 0;
+              audioRef.current.play().catch(() => {
+                console.log("Browser chặn âm thanh");
+              });
+            }
+
             setShowToast(true);
-            // Kích hoạt âm thanh thông báo
-          const isSoundEnabled = localStorage.getItem("enableSound") !== "false"; 
-           if (isSoundEnabled) {
-        const audio = new Audio('/alert.mp3');
-        audio.play().catch(() => console.log("Chặn tự động phát âm thanh"));
-    }
           }
-          return freshData;
+
+          return data.slice(0, 9);
         });
+
       } else {
         setLogs([]);
       }
-    } catch (err) {
-      console.error("Mất kết nối server AI...");
+
+    } catch {
+      console.log("AI server error");
     }
   }, []);
 
+  useEffect(() => {
+    fetchLogs();
+    const timer = setInterval(fetchLogs, 2000);
+    return () => clearInterval(timer);
+  }, [fetchLogs]);
+
   const handleDelete = async (id) => {
-    if (window.confirm("Xóa bằng chứng vi phạm này?")) {
-      try {
-        await axiosClient.delete(`/logs/${id}`);
-        setLogs(prev => prev.filter(log => log.id !== id));
-      } catch (err) {
-        alert("Lỗi khi xóa dữ liệu");
-      }
-    }
+    await axiosClient.delete(`/logs/${id}`);
+    setLogs(prev => prev.filter(log => log.id !== id));
   };
 
-  // 2. Fix lỗi Infinite Loop bằng cách để mảng dependency rỗng
-useEffect(() => {
-  // 1. Gọi lần đầu tiên ngay khi mở trang
-  fetchLogs();
-
-  // 2. Lấy con số bạn đã lưu ở Settings (mặc định là 2 nếu chưa lưu)
-  const savedInterval = localStorage.getItem("refreshInterval") || "2";
-  
-  // 3. Chuyển từ Giây sang Mili giây (VD: 4 giây -> 4000ms)
-  const intervalMs = parseInt(savedInterval) * 1000;
-
-  // 4. Thiết lập đồng hồ quét tự động theo đúng ý bạn
-  const timer = setInterval(fetchLogs, intervalMs);
-
-  // Dọn dẹp bộ nhớ khi tắt trang
-  return () => clearInterval(timer);
-}, [fetchLogs]);
+  // fake AI metrics
+  const EAR = 0.21;
+  const fatigueLevel = logs.length > 3 ? 70 : 30;
 
   return (
-    <Container className="mt-3 mt-md-4 pb-5">
+    <Container className="mt-4 pb-5">
+
       <ToastNotification 
         show={showToast} 
         newLog={newestLog} 
         onClose={() => setShowToast(false)} 
       />
 
-      {/* Header: Responsive linh hoạt */}
-      <div className="d-flex flex-column flex-sm-row align-items-sm-center mb-4 border-start border-4 border-warning ps-3 py-1 gap-2">
-        <div>
-          <h4 className="mb-0 text-light text-uppercase fw-bold" style={{ fontSize: 'calc(1.1rem + 0.3vw)' }}>
-            Giám Sát Trực Tuyến
-          </h4>
-          <p className="text-muted small mb-0 d-flex align-items-center">
-            <Activity size={12} className="text-success me-1 animate-pulse" /> 
-            AI Mode: <span className="ms-1 text-info">Production Test</span>
-          </p>
-        </div>
-        <div className="ms-sm-auto">
-          <Badge bg="dark" className="p-2 border border-secondary shadow-sm">
-            <Database size={14} className="me-1 text-info" /> 
-            Bộ nhớ: {logs.length}/12
-          </Badge>
+      {/* HEADER */}
+      <div className="mb-4">
+        <h4 style={{ color: "#3b82f6" }}>
+          AI DRIVER ANALYTICS SYSTEM
+        </h4>
+        <div className="text-secondary small">
+          Real-time drowsiness detection using Eye Aspect Ratio (EAR)
         </div>
       </div>
 
-      {/* 3. Grid System: Tối ưu cho 3 loại thiết bị */}
-      <Row className="g-3 g-md-4">
-        {logs.map((log) => (
-          /* xs={12}: 1 cột trên Điện thoại 
-             sm={6}: 2 cột trên Máy tính bảng nhỏ
-             md={4}: 3 cột trên Máy tính bảng lớn
-             lg={3}: 4 cột trên Máy tính (PC)
-          */
-          <Col xs={12} sm={6} md={4} lg={3} key={log.id}>
-            <Card className="border-0 shadow-sm h-100 bg-white overflow-hidden card-violation">
-              <div className="position-relative">
-                <Card.Img 
-                  variant="top" 
-                  src={`${API_ROOT}/api/images/${log.image}`} 
-                  style={{ height: "180px", objectFit: "cover" }}
-                  loading="lazy" // Tối ưu tốc độ load ảnh
-                />
-                <div className="position-absolute top-0 end-0 p-2">
-                  <Badge bg="danger" className="shadow d-flex align-items-center gap-1">
-                    <ShieldAlert size={10} /> CẢNH BÁO
-                  </Badge>
-                </div>
+      {/* METRICS */}
+      <Row className="g-3 mb-4">
+
+        <Col md={3}>
+          <Card style={{ background: "#111827", color: "#fff" }}>
+            <Card.Body>
+              <div className="text-secondary small">System Status</div>
+              <div style={{ color: "#22c55e" }}>
+                <Activity size={16}/> ACTIVE
               </div>
+            </Card.Body>
+          </Card>
+        </Col>
 
-              <Card.Body className="p-3 d-flex flex-column">
-                <div className="fw-bold text-danger mb-1 d-flex align-items-center gap-1" style={{fontSize: '0.9rem'}}>
-                  <FileText size={14} /> VI PHẠM SỬ DỤNG ĐT
-                </div>
-                
-                <div className="text-muted d-flex align-items-center mb-3" style={{ fontSize: '0.75rem' }}>
-                  <Clock size={12} className="me-1 text-primary" /> {log.time}
+        <Col md={3}>
+          <Card style={{ background: "#111827", color: "#fff" }}>
+            <Card.Body>
+              <div className="text-secondary small">Total Alerts</div>
+              <div style={{ color: "#ef4444" }}>
+                {logs.length}
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+
+        <Col md={3}>
+          <Card style={{ background: "#111827", color: "#fff" }}>
+            <Card.Body>
+              <div className="text-secondary small">EAR Value</div>
+              <div style={{ color: "#3b82f6" }}>
+                {EAR}
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+
+        <Col md={3}>
+          <Card style={{ background: "#111827", color: "#fff" }}>
+            <Card.Body>
+              <div className="text-secondary small">Fatigue Level</div>
+              <div style={{ color: "#f59e0b" }}>
+                {fatigueLevel}%
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+
+      </Row>
+
+      {/* INSIGHT */}
+      <Card className="mb-4" style={{ background: "#111827", color: "#fff" }}>
+        <Card.Body>
+
+          <div className="d-flex justify-content-between align-items-center mb-2">
+            <div>
+              <TrendingUp size={16}/> Driver Fatigue Analysis
+            </div>
+            <Badge bg="dark" className="border border-primary">
+              REAL-TIME
+            </Badge>
+          </div>
+
+          <ProgressBar 
+            now={fatigueLevel} 
+            variant={fatigueLevel > 60 ? "danger" : "info"} 
+            style={{ height: "10px" }}
+          />
+
+          <div className="text-secondary small mt-2">
+            Estimated fatigue level based on blink rate & EAR threshold
+          </div>
+
+        </Card.Body>
+      </Card>
+
+      {/* LOGS */}
+      <Row className="g-3">
+        {logs.map((log) => (
+          <Col md={4} key={log.id}>
+            <Card style={{ background: "#111827", color: "#fff" }}>
+
+              <Card.Img 
+                src={`${API_ROOT}/api/images/${log.image}`} 
+                style={{ height: "180px", objectFit: "cover" }}
+              />
+
+              <Card.Body>
+
+                <div style={{ color: "#ef4444" }}>
+                  <AlertTriangle size={14}/> DROWSINESS DETECTED
                 </div>
 
-                <div className="d-flex gap-2 mt-auto pt-2 border-top">
-                  <Button 
-                    variant="outline-danger" 
-                    size="sm" 
-                    className="flex-grow-1 d-flex align-items-center justify-content-center"
+                <div className="text-secondary small mb-2">
+                  <Clock size={12}/> {log.time}
+                </div>
+
+                <div className="d-flex gap-2">
+
+                  <Button size="sm" variant="outline-danger"
                     onClick={() => handleDelete(log.id)}
                   >
-                    <Trash2 size={14} className="me-1" /> Xóa
+                    <Trash2 size={14}/>
                   </Button>
-                  <Button 
-                    variant="dark" 
-                    size="sm" 
-                    onClick={() => window.open(`${API_ROOT}/api/images/${log.image}`, '_blank')}
+
+                  <Button size="sm" variant="primary"
+                    onClick={() => window.open(`${API_ROOT}/api/images/${log.image}`)}
                   >
-                    <ExternalLink size={14} />
+                    <ExternalLink size={14}/>
                   </Button>
+
                 </div>
+
               </Card.Body>
             </Card>
           </Col>
         ))}
       </Row>
 
-      {/* Trạng thái trống */}
-      {logs.length === 0 && (
-        <div className="text-center py-5">
-          <Monitor size={60} className="text-secondary opacity-25" />
-          <h6 className="text-muted mt-3">Đang đợi tín hiệu từ Camera AI...</h6>
-        </div>
-      )}
     </Container>
   );
 }

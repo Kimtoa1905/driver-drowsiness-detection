@@ -18,7 +18,7 @@ function App() {
           <Container fluid="lg"> 
             <Routes>
               <Route path="/" element={<Dashboard />} />
-              <Route path="/report" element={<Report />} />
+              {/*<Route path="/report" element={<Report />} />*/}
               <Route path="/settings" element={<Settings />} />
               <Route path="*" element={<Dashboard />} />
             </Routes>
@@ -30,30 +30,94 @@ function App() {
             - Chỉnh lại font size và độ mờ để thông tin hiện rõ nhưng không bị thô.
         */}
 {/* 3. Footer: Tối ưu Tối giản & Sang trọng */}
-        <footer className="py-3 border-top border-secondary mt-auto bg-dark">
-          <Container>
-            <div className="d-flex flex-column flex-sm-row justify-content-between align-items-center opacity-75">
-              
-              {/* Bên trái: Copyright */}
-              <div className="text-center text-sm-start mb-2 mb-sm-0">
-                <small className="text-muted">
-                  © 2026 <span className="text-warning fw-bold">PhoneGuard AI</span>
-                </small>
-              </div>
-              
-              {/* Bên phải: Dev Info (Đã xóa bản thử nghiệm) */}
-              <div className="text-center text-sm-end">
-                <span 
-                  style={{fontSize: '10px', letterSpacing: '1px'}} 
-                  className="text-uppercase fw-medium text-secondary"
-                >
-                  Phát triển bởi Quoc Tinh Dev
-                </span>
-              </div>
+    <footer
+  className="mt-auto"
+  style={{
+    background: "linear-gradient(90deg, #020617, #1e3a8a)",
+    borderTop: "1px solid rgba(59,130,246,0.2)",
+    boxShadow: "0 -5px 20px rgba(59,130,246,0.15)"
+  }}
+>
+  <Container className="py-3">
 
-            </div>
-          </Container>
-        </footer>
+    <div className="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+
+      {/* LEFT: SYSTEM */}
+      <div className="text-center text-md-start">
+        <div
+          style={{
+            color: "#3b82f6",
+            fontWeight: "bold",
+            fontSize: "13px",
+            letterSpacing: "1px",
+            textShadow: "0 0 8px rgba(59,130,246,0.5)"
+          }}
+        >
+          AI DRIVER MONITOR
+        </div>
+
+        <div
+          style={{
+            fontSize: "10px",
+            color: "#9ca3af"
+          }}
+        >
+          Real-time Drowsiness Detection System
+        </div>
+      </div>
+
+      {/* CENTER: STATUS */}
+      <div className="d-none d-md-flex align-items-center gap-2">
+
+        <div
+          style={{
+            width: "8px",
+            height: "8px",
+            borderRadius: "50%",
+            background: "#22c55e",
+            boxShadow: "0 0 6px #22c55e"
+          }}
+        ></div>
+
+        <span
+          style={{
+            fontSize: "11px",
+            color: "#22c55e",
+            letterSpacing: "1px"
+          }}
+        >
+          SYSTEM ACTIVE
+        </span>
+
+      </div>
+
+      {/* RIGHT: VERSION */}
+      <div className="text-center text-md-end">
+        <div
+          style={{
+            fontSize: "10px",
+            color: "#3b82f6",
+            opacity: 0.8,
+            letterSpacing: "1px"
+          }}
+        >
+          VERSION 1.0
+        </div>
+
+        <div
+          style={{
+            fontSize: "9px",
+            color: "#6b7280"
+          }}
+        >
+          Driver Monitoring System
+        </div>
+      </div>
+
+    </div>
+
+  </Container>
+</footer>
       </div>
 
       <style>{`
